@@ -13,7 +13,7 @@ class SlideSubsystem(Subsystem):
     
         self.setToLoad()
 
-    def getState(self) -> None:
+    def getState(self) -> DoubleSolenoid.value:
         """
         returns the state of the slide
         """

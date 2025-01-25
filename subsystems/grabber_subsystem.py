@@ -32,6 +32,21 @@ class GrabberSubsystem(Subsystem):
         self.pid.setTolerance(0.5)
     
 
+
+    def closeGrabber(self) -> None:
+        self.solenoid.set(DoubleSolenoid.Value.kReverse)
+    
+    def openGrabber(self) -> None:
+        self.solenoid.set(DoubleSolenoid.Value.kForward)
+    
+    def toggleGrabber(self) -> None:
+        self.solenoid.toggle()
+    
+    def getGrabberState(self) -> DoubleSolenoid.Value:
+        return self.solenoid.get()
+
+
+
     @property
     def grabber_angle(self):
         return self.encoder.get()
