@@ -1,4 +1,4 @@
-from .basic_commands.drive_controller_command import DriveControllerCommand
+from .drive_controller_command import DriveControllerCommand
 from .basic_commands.grabber_angle_controller_command import GrabberAngleControllerCommand
 from .basic_commands.run_picker_command import RunPickerCommand
 from .basic_commands.toggle_grabber_command import ToggleGrabberCommand
