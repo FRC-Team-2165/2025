@@ -2,16 +2,32 @@ import wpilib
 import commands2
 import commands2.button as button
 
-from subsystems import DriveSubsystem
+from subsystems import DriveSubsystem,\
+    GrabberSubsystem,\
+    PickerSubsystem,\
+    SlideSubsystem
 
-from commands import DriveControllerCommand
+from commands import DriveControllerCommand,\
+    GrabberAngleControllerCommand,\
+    RunPickerCommand,\
+    ToggleGrabberCommand,\
+    TogglePickerCommand,\
+    ToggleSlideCommand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
         self.main_controller = button.CommandXboxController(0)
         self.drive = DriveSubsystem()
+        self.grabber = GrabberSubsystem()
+        self.picker = PickerSubsystem()
+        self.slide = SlideSubsystem()
 
         self.drive.setDefaultCommand(DriveControllerCommand(self.drive, self.main_controller))
+        self.grabber.setDefaultCommand(GrabberAngleControllerCommand(self.grabber, self.main_controller))
+        
+        self.main_controller.leftBumper().onTrue(ToggleGrabberCommand(self.grabber))
+        self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
+        self.main_controller.y().onTrue(ToggleSlideCommand(self.slide))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()

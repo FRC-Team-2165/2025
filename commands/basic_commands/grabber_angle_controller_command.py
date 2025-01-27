@@ -11,7 +11,16 @@ class GrabberAngleControllerCommand(Command):
         self.subsystem = subsystem
         self.addRequirements(subsystem)
     
+    def initialize(self):
+        return super().initialize()
+    
     def execute(self):
         speed = -self.controller.getRightY()
         speed = applyDeadband(speed, 0.1)
         self.subsystem.move(speed)
+    
+    def end(self, interrupted):
+        return super().end(interrupted)
+    
+    def isFinished(self):
+        return super().isFinished()
