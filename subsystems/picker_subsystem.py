@@ -33,6 +33,12 @@ class PickerSubsystem(Subsystem):
         """
         self.solenoid.set(DoubleSolenoid.Value.kReverse)
     
+    def toggleIntakePosition(self) -> None:
+        """
+        toggles the intake subsystem's position
+        """
+        self.solenoid.toggle()
+    
     def startMotor(self, speed = 1) -> None:
         """
         start the intake motor to the given speed, default 1
