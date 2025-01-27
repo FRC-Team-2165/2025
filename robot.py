@@ -28,6 +28,7 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.leftBumper().onTrue(ToggleGrabberCommand(self.grabber))
         self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
         self.main_controller.y().onTrue(ToggleSlideCommand(self.slide))
+        self.main_controller.rightTrigger().whileTrue(RunPickerCommand(self.picker))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
