@@ -13,7 +13,8 @@ from commands import DriveControllerCommand,\
     ToggleGrabberCommand,\
     TogglePickerCommand,\
     ToggleSlideCommand,\
-    WatchTagCommand
+    WatchTagCommand,\
+    DistanceTagCommand
 
 from components import LocationDataClientManager
 
@@ -37,7 +38,8 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.y().onTrue(ToggleSlideCommand(self.slide))
         self.main_controller.rightTrigger().whileTrue(RunPickerCommand(self.picker))
 
-        self.main_controller.leftTrigger().whileTrue(WatchTagCommand(self.drive, self.LDC, 3))
+        self.main_controller.a().whileTrue(WatchTagCommand(self.drive, self.LDC, 3, 5, True))
+        self.main_controller.b().whileTrue(DistanceTagCommand(self.drive, self.LDC, 3, 3, 0.5, True))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
