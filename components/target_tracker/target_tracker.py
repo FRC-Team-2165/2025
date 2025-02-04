@@ -1,17 +1,12 @@
 from dataclasses import dataclass
 import math
 
-#TODO fix relative target setter
-
 @dataclass
 class Position:
     x: float = 0
     y: float = 0
     z: float = 0
     angle: float = 0
-
-    # def derive_angle(self):
-    #     self.angle = math.degrees(math.atan(self.x/self.y))
 
     def __add__(self, pos: "Position"):
         output = Position()
@@ -29,7 +24,15 @@ class TargetTracker:
     
     def updateTargetPosition(self, target_pos: Position, relative: bool = True):
         if relative:
-            self.target_pos = self.current_pos + target_pos
+            # self.target_pos = self.current_pos + target_pos
+            relative_pos = Position()
+            angle = self.current_pos.angle + target_pos.angle
+            hyp = math.sqrt(abs(target_pos.x) ** 2 + abs(target_pos.y) ** 2)
+            relative_pos.angle = angle
+            relative_pos.x = math.cos(angle) * hyp
+            relative_pos.y = math.sin(angle) * hyp
+
+            self.target_pos = self.current_pos + relative_pos
         else:
             self.target_pos = target_pos
     
