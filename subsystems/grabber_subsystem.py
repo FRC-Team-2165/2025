@@ -14,7 +14,8 @@ class GrabberSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
 
-        self.solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
+        self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
+        self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
         self.motor = phoenix5.WPI_VictorSPX(0)
         self.upper_limit = wpilib.DigitalInput(0)
         self.lower_limit = wpilib.DigitalInput(0)
@@ -34,16 +35,28 @@ class GrabberSubsystem(Subsystem):
 
 
     def closeGrabber(self) -> None:
-        self.solenoid.set(DoubleSolenoid.Value.kReverse)
+        self.grab_solenoid.set(DoubleSolenoid.Value.kReverse)
     
     def openGrabber(self) -> None:
-        self.solenoid.set(DoubleSolenoid.Value.kForward)
+        self.grab_solenoid.set(DoubleSolenoid.Value.kForward)
     
     def toggleGrabber(self) -> None:
-        self.solenoid.toggle()
+        self.grab_solenoid.toggle()
     
     def getGrabberState(self) -> DoubleSolenoid.Value:
-        return self.solenoid.get()
+        return self.grab_solenoid.get()
+    
+    def extendBird(self) -> None:
+        self.bird_solenoid.set(DoubleSolenoid.Value.kReverse)
+    
+    def retractBird(self) -> None:
+        self.bird_solenoid.set(DoubleSolenoid.Value.kForward)
+    
+    def toggleBird(self) -> None:
+        self.bird_solenoid.toggle()
+    
+    def getBirdState(self) -> DoubleSolenoid.Value:
+        return self.bird_solenoid.get()
 
 
 
