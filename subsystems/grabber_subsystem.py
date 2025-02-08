@@ -14,8 +14,8 @@ class GrabberSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
 
-        self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
-        self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
+        self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 5, 4)
+        self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 7, 6)
         self.motor = phoenix5.WPI_VictorSPX(0)
         self.upper_limit = wpilib.DigitalInput(0)
         self.lower_limit = wpilib.DigitalInput(0)

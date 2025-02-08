@@ -9,7 +9,7 @@ class SlideSubsystem(Subsystem):
     def __init__(self):
         super().__init__() 
 
-        self.solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 0)
+        self.solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 3, 2)
     
         self.setToLoad()
 
