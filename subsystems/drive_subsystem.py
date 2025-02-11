@@ -21,7 +21,7 @@ class DriveSubsystem(Subsystem):
         self.yLimiter = SlewRateLimiter(1.8)
         self.rotationLimiter = SlewRateLimiter(1.8)
 
-        self.gyro = navx.AHRS(wpilib.SPI.Port.kMXP)
+        self.gyro = navx.AHRS(navx.AHRS.NavXComType.kMXP_SPI)
         self.swervedrive = drive.SwerveDrive(front_left, front_right, rear_left, rear_right, 0.1)
 
         self.yaw_offset = starting_angle

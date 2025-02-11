@@ -4,3 +4,4 @@ from .basic_commands.run_picker_command import RunPickerCommand
 from .basic_commands.toggle_grabber_command import ToggleGrabberCommand
 from .basic_commands.toggle_picker_command import TogglePickerCommand
 from .basic_commands.toggle_slide_command import ToggleSlideCommand
+from .basic_commands.toggle_bird_command import ToggleBirdCommand

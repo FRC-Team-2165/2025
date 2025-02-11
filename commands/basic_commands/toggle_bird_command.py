@@ -1,7 +1,7 @@
 from commands2 import Command
 from subsystems import GrabberSubsystem
 
-class ToggleGrabberCommand(Command):
+class ToggleBirdCommand(Command):
     def __init__(self, subsystem: GrabberSubsystem):
         super().__init__()
 

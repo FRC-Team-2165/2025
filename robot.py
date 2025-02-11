@@ -12,7 +12,8 @@ from commands import DriveControllerCommand,\
     RunPickerCommand,\
     ToggleGrabberCommand,\
     TogglePickerCommand,\
-    ToggleSlideCommand
+    ToggleSlideCommand,\
+    ToggleBirdCommand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -27,7 +28,8 @@ class Robot(wpilib.TimedRobot):
         
         self.main_controller.leftBumper().onTrue(ToggleGrabberCommand(self.grabber))
         self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
-        self.main_controller.y().onTrue(ToggleSlideCommand(self.slide))
+        self.main_controller.x().onTrue(ToggleSlideCommand(self.slide))
+        self.main_controller.y().onTrue(ToggleBirdCommand(self.grabber))
         self.main_controller.rightTrigger().whileTrue(RunPickerCommand(self.picker))
 
     def robotPeriodic(self):

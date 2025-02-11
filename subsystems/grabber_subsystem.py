@@ -5,7 +5,6 @@ import phoenix5
 from wpimath.controller import PIDController
 
 #TODO add motor IDs
-#TODO add solenoid channels
 #TODO verify solenoid positions
 #TODO add sensor ID
 #TODO verify PID setup and calibration
@@ -16,15 +15,18 @@ class GrabberSubsystem(Subsystem):
 
         self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 5, 4)
         self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 7, 6)
-        self.motor = phoenix5.WPI_VictorSPX(0)
-        self.upper_limit = wpilib.DigitalInput(0)
-        self.lower_limit = wpilib.DigitalInput(0)
+        self.motor = phoenix5.WPI_TalonSRX(14)
+        self.upper_limit = wpilib.DigitalInput(1)
+        self.lower_limit = wpilib.DigitalInput(2)
 
-        self.encoder = wpilib.DutyCycleEncoder(0)
+        self.openGrabber()
+        self.retractBird()
+
+        self.encoder = wpilib.DutyCycleEncoder(5)
 
         self.lower_limit_val = 0
         self.upper_limit_val = 0
-        self.target_angle = 0
+        self.target_angle = self.grabber_angle
 
         p = 1/30
         i = 0

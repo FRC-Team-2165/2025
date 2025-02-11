@@ -4,7 +4,6 @@ import phoenix5
 import wpilib
 
 #TODO add motor IDs
-#TODO add solenoid channels
 #TODO verify solenoid positions
 #TODO add sensor ID
 
@@ -12,7 +11,7 @@ class PickerSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
 
-        self.intake_motor = phoenix5.WPI_VictorSPX(0)
+        self.intake_motor = phoenix5.WPI_VictorSPX(13)
         self.intake_speed = 0
 
         self.sensor = wpilib.DigitalInput(0)

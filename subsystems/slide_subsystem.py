@@ -2,7 +2,6 @@ from commands2 import Subsystem
 from wpilib import DoubleSolenoid
 import wpilib
 
-#TODO add solenoid channels
 #TODO verify solenoid positions
 
 class SlideSubsystem(Subsystem):
@@ -13,7 +12,7 @@ class SlideSubsystem(Subsystem):
     
         self.setToLoad()
 
-    def getState(self) -> DoubleSolenoid.value:
+    def getState(self) -> DoubleSolenoid.Value:
         """
         returns the state of the slide
         """

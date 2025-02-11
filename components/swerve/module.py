@@ -73,12 +73,13 @@ class SwerveModuleConfig:
 class SwerveModule(MotorSafety):
     def __init__(self, module_config: SwerveModuleConfig):
         super().__init__()
-        self.drive_motor = rev.CANSparkMax(module_config.dmotor_id, rev.CANSparkMax.MotorType.kBrushless)
+        self.drive_motor = rev.SparkMax(module_config.dmotor_id, rev.SparkMax.MotorType.kBrushless)
         self.drive_encoder = self.drive_motor.getEncoder()
-        self.drive_encoder.setVelocityConversionFactor(module_config.dwheel_circumference / (module_config.gear_ratio * 60.0))
-        self.drive_encoder.setPositionConversionFactor(module_config.dwheel_circumference / module_config.gear_ratio)
+        # self.drive_encoder.setVelocityConversionFactor(module_config.dwheel_circumference / (module_config.gear_ratio * 60.0))
+        self.velocity_conversion_factor = module_config.dwheel_circumference / (module_config.gear_ratio * 60.0)
+        # self.drive_encoder.setPositionConversionFactor(module_config.dwheel_circumference / module_config.gear_ratio)
 
-        self.turn_motor = phoenix5.WPI_TalonFX(module_config.tmotor_id)
+        self.turn_motor = phoenix5.WPI_TalonSRX(module_config.tmotor_id)
         self.turn_encoder = phoenix5.sensors.CANCoder(module_config.tencoder_id)
 
         self.drive_motor.setInverted(module_config.inverted)
@@ -142,7 +143,7 @@ class SwerveModule(MotorSafety):
         self.setState(vector)
 
     def get_state_mps(self):
-        return Polar(self.drive_encoder.getVelocity(), self.getWheelAngle())
+        return Polar(self.drive_encoder.getVelocity() * self.velocity_conversion_factor, self.getWheelAngle())
     
     def rotation_angle(self):
         base = self.relative_position.angle().degrees() + 90
