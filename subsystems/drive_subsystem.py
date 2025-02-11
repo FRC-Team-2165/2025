@@ -12,10 +12,10 @@ class DriveSubsystem(Subsystem):
 
         self.speed_modifier = 1
 
-        front_left = swervemodule.SwerveModuleConfig(4, 3, 10, Translation2d(0.339725, 0.288925), True, gear_ratio= 8.14)
+        front_left = swervemodule.SwerveModuleConfig(4, 3, 10, Translation2d(0.339725, 0.288925), gear_ratio= 8.14)
         rear_left = swervemodule.SwerveModuleConfig(2, 1, 9, Translation2d(0.339725, -0.288925), gear_ratio= 8.14)
-        rear_right = swervemodule.SwerveModuleConfig(8, 7, 12, Translation2d(-0.339725, -0.288925), gear_ratio= 8.14)
-        front_right = swervemodule.SwerveModuleConfig(6, 5, 11, Translation2d(-0.339725, 0.288925), gear_ratio=8.14)
+        rear_right = swervemodule.SwerveModuleConfig(8, 7, 12, Translation2d(-0.339725, -0.288925), True, gear_ratio= 8.14)
+        front_right = swervemodule.SwerveModuleConfig(6, 5, 11, Translation2d(-0.339725, 0.288925), True, gear_ratio=8.14)
 
         self.xLimiter = SlewRateLimiter(1.8)
         self.yLimiter = SlewRateLimiter(1.8)

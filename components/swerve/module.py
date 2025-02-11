@@ -103,7 +103,7 @@ class SwerveModule(MotorSafety):
 
     def setWheelAngle(self, angle: float):
         angle = self.optimizeAngle(angle)
-        self.turn_motor.set(phoenix5.ControlMode.Position, 4096 / 360.0 * angle)
+        self.turn_motor.set(phoenix5.ControlMode.Position, (4096 / 360.0 * angle))
         self.feed()
 
     def setTargetSpeed(self, speed):

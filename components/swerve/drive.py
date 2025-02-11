@@ -63,6 +63,7 @@ class SwerveDrive(RobotDriveBase):
             if s.magnitude == 0:
                 self.modules[i].setTargetSpeed(0)
             else:
+                s.theta += 90
                 self.modules[i].setState(s)
         
         self.feed()

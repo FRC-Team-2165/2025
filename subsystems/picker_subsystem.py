@@ -16,7 +16,7 @@ class PickerSubsystem(Subsystem):
 
         self.sensor = wpilib.DigitalInput(0)
 
-        self.solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 1, 0)
+        self.solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 0, 1)
 
         self.raiseIntake()
     
