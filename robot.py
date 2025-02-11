@@ -23,7 +23,7 @@ class Robot(wpilib.TimedRobot):
         self.picker = PickerSubsystem()
         self.slide = SlideSubsystem()
 
-        self.drive.setDefaultCommand(DriveControllerCommand(self.drive, self.main_controller))
+        # self.drive.setDefaultCommand(DriveControllerCommand(self.drive, self.main_controller))
         self.grabber.setDefaultCommand(GrabberAngleControllerCommand(self.grabber, self.main_controller))
         
         self.main_controller.leftBumper().onTrue(ToggleGrabberCommand(self.grabber))

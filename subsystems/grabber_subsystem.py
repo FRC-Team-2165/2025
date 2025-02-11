@@ -3,11 +3,12 @@ from wpilib import DoubleSolenoid
 import wpilib
 import phoenix5
 from wpimath.controller import PIDController
+import rev
 
-#TODO add motor IDs
-#TODO verify solenoid positions
 #TODO add sensor ID
 #TODO verify PID setup and calibration
+
+#TODO encoder is currently returning 1.0 at all times
 
 class GrabberSubsystem(Subsystem):
     def __init__(self):
@@ -16,8 +17,8 @@ class GrabberSubsystem(Subsystem):
         self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 5, 4)
         self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 7, 6)
         self.motor = phoenix5.WPI_TalonSRX(14)
-        self.upper_limit = wpilib.DigitalInput(1)
-        self.lower_limit = wpilib.DigitalInput(2)
+        # self.upper_limit = wpilib.DigitalInput(1)
+        # self.lower_limit = wpilib.DigitalInput(2)
 
         self.openGrabber()
         self.retractBird()
@@ -29,10 +30,12 @@ class GrabberSubsystem(Subsystem):
         self.target_angle = self.grabber_angle
 
         p = 1/30
-        i = 0
+        i = 1/300
         d = 0
         self.pid = PIDController(p, i, d)
         self.pid.setTolerance(0.5)
+
+        self.stationary = False
     
 
 
@@ -72,18 +75,16 @@ class GrabberSubsystem(Subsystem):
     
     def stopMotor(self) -> None:
         self.motor.set(0)
-    
-    def _limitMovement(self, speed: float) -> float:
-        if speed > 0 and self.upper_limit.get() or\
-          speed < 0 and self.lower_limit.get():
-            speed = 0
-        return speed
 
     def move(self, speed: float) -> None:
-        speed = self._limitMovement(speed)
         if speed == 0:
-            self.target_angle = self.grabber_angle
+            if self.stationary:
+                pass
+            else:
+                self.stationary = True
+                self.target_angle = self.grabber_angle
         else:
+            self.stationary = False
             self.target_angle += 0.525 * speed
         
     def periodic(self) -> None:
@@ -91,6 +92,6 @@ class GrabberSubsystem(Subsystem):
         current_angle = self.grabber_angle
         speed = self.pid.calculate(current_angle)
 
-        speed = self._limitMovement(speed)
-
         self.motor.set(speed)
+
+        print(self.grabber_angle)
