@@ -12,6 +12,7 @@ class PickerSubsystem(Subsystem):
         super().__init__()
 
         self.intake_motor = phoenix5.WPI_VictorSPX(13)
+        self.intake_motor.setInverted(True)
         self.intake_speed = 0
 
         self.sensor = wpilib.DigitalInput(0)

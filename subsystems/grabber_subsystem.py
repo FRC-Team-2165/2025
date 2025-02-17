@@ -17,6 +17,7 @@ class GrabberSubsystem(Subsystem):
         self.grab_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 5, 4)
         self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 7, 6)
         self.motor = phoenix5.WPI_TalonSRX(14)
+        self.motor.setInverted(True)
         # self.upper_limit = wpilib.DigitalInput(1)
         # self.lower_limit = wpilib.DigitalInput(2)
 
@@ -35,7 +36,7 @@ class GrabberSubsystem(Subsystem):
         self.pid = PIDController(p, i, d)
         self.pid.setTolerance(0.5)
 
-        self.stationary = False
+        self.last_input = 0
     
 
 
@@ -77,14 +78,12 @@ class GrabberSubsystem(Subsystem):
         self.motor.set(0)
 
     def move(self, speed: float) -> None:
-        if speed == 0:
-            if self.stationary:
+        if abs(speed) <= 0.001:
+            if abs(self.last_input) <= 0.001:
                 pass
-            else:
-                self.stationary = True
+            elif abs(self.last_input) > 0.001:
                 self.target_angle = self.grabber_angle
         else:
-            self.stationary = False
             self.target_angle += 0.525 * speed
         
     def periodic(self) -> None:
