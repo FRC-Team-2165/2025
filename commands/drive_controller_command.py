@@ -1,6 +1,7 @@
 from commands2 import Command
 from subsystems import DriveSubsystem
 import wpilib
+from wpimath import applyDeadband
 
 class DriveControllerCommand(Command):
     def __init__(self, subsystem: DriveSubsystem, controller: wpilib.XboxController):
@@ -18,6 +19,8 @@ class DriveControllerCommand(Command):
         drive_x = self.controller.getLeftX() * self.drive.speed_modifier
         drive_y = -self.controller.getLeftY() * self.drive.speed_modifier
         rotate = self.controller.getRightX() * self.drive.speed_modifier
+
+        rotate = applyDeadband(rotate, 0.3)
 
         if self.controller.getRightTriggerAxis() > 0.5:
             self.drive.speed_modifier = 1

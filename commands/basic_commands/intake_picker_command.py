@@ -1,7 +1,7 @@
 from commands2 import Command
 from subsystems import PickerSubsystem
 
-class RunPickerCommand(Command):
+class IntakePickerCommand(Command):
     def __init__(self, subsystem: PickerSubsystem):
         super().__init__()
 
@@ -13,13 +13,11 @@ class RunPickerCommand(Command):
         self.subsystem.startMotor()
 
     def execute(self):
-        if self.subsystem.hasObject():
-            self.subsystem.stopMotor()
-        else:
-            self.subsystem.startMotor()
+        return super().execute()
 
     def end(self, interrupted):
         self.subsystem.stopMotor()
 
     def isFinished(self):
-        return super().isFinished()
+        if self.subsystem.hasObject():
+            return True

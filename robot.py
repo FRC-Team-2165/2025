@@ -9,11 +9,14 @@ from subsystems import DriveSubsystem,\
 
 from commands import DriveControllerCommand,\
     GrabberAngleControllerCommand,\
-    RunPickerCommand,\
+    IntakePickerCommand,\
+    SpitPickerCommand,\
     ToggleGrabberCommand,\
     TogglePickerCommand,\
     ToggleSlideCommand,\
-    ToggleBirdCommand
+    ToggleBirdCommand,\
+    GrabberAnglePresetCommand,\
+    ResetDriveCommand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -24,13 +27,20 @@ class Robot(wpilib.TimedRobot):
         self.slide = SlideSubsystem()
 
         self.drive.setDefaultCommand(DriveControllerCommand(self.drive, self.main_controller))
+        self.main_controller.back().and_(self.main_controller.start()).onTrue(ResetDriveCommand(self.drive))
         self.grabber.setDefaultCommand(GrabberAngleControllerCommand(self.grabber, self.main_controller))
         
         self.main_controller.leftBumper().onTrue(ToggleGrabberCommand(self.grabber))
         self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
         self.main_controller.x().onTrue(ToggleSlideCommand(self.slide))
         self.main_controller.y().onTrue(ToggleBirdCommand(self.grabber))
-        self.main_controller.rightTrigger().whileTrue(RunPickerCommand(self.picker))
+        self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
+        self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
+
+        self.main_controller.povUp().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
+        self.main_controller.povDown().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
+        self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
+        self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
@@ -42,7 +52,7 @@ class Robot(wpilib.TimedRobot):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
-        return super().teleopInit()
+        self.grabber.grabber_angle = self.grabber.grabber_angle
     
     def teleopPeriodic(self):
         return super().teleopPeriodic()

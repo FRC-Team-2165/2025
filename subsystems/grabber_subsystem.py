@@ -4,11 +4,7 @@ import wpilib
 import phoenix5
 from wpimath.controller import PIDController
 import rev
-
-#TODO add sensor ID
-#TODO verify PID setup and calibration
-
-#TODO encoder is currently returning 1.0 at all times
+from dataclasses import dataclass
 
 class GrabberSubsystem(Subsystem):
     def __init__(self):
@@ -18,20 +14,25 @@ class GrabberSubsystem(Subsystem):
         self.bird_solenoid = DoubleSolenoid(wpilib.PneumaticsModuleType.CTREPCM, 7, 6)
         self.motor = phoenix5.WPI_TalonSRX(14)
         self.motor.setInverted(True)
-        # self.upper_limit = wpilib.DigitalInput(1)
-        # self.lower_limit = wpilib.DigitalInput(2)
 
-        self.openGrabber()
-        self.retractBird()
+        self.presets = GrabberPresets()
 
         self.encoder = wpilib.DutyCycleEncoder(5)
 
-        self.lower_limit_val = 0
-        self.upper_limit_val = 0
-        self.target_angle = self.grabber_angle
+        self.upper_limit_val_closed = 127
+        self.upper_limit_val_open = 77
+        self.lower_limit_val = -54
 
-        p = 1/30
-        i = 1/300
+        self.target_angle = self.grabber_angle
+        self.grabber_angle = self.grabber_angle
+
+        self.grabber_open = False
+        self.bird_extended = False
+        self.closeGrabber()
+        self.retractBird()
+
+        p = 0.03
+        i = 0
         d = 0
         self.pid = PIDController(p, i, d)
         self.pid.setTolerance(0.5)
@@ -41,16 +42,21 @@ class GrabberSubsystem(Subsystem):
 
 
     def closeGrabber(self) -> None:
-        self.grab_solenoid.set(DoubleSolenoid.Value.kReverse)
+        self.grab_solenoid.set(DoubleSolenoid.Value.kForward)
+        self.grabber_open = False
     
     def openGrabber(self) -> None:
-        self.grab_solenoid.set(DoubleSolenoid.Value.kForward)
+        if self.grabber_angle < self.upper_limit_val_open and self.target_angle < self.upper_limit_val_open:
+            self.grab_solenoid.set(DoubleSolenoid.Value.kReverse)
+            self.grabber_open = True
     
     def toggleGrabber(self) -> None:
-        self.grab_solenoid.toggle()
-    
-    def getGrabberState(self) -> DoubleSolenoid.Value:
-        return self.grab_solenoid.get()
+        if self.grabber_open:
+            self.closeGrabber()
+            self.grabber_open = False
+        else:
+            self.openGrabber()
+            self.grabber_open = True
     
     def extendBird(self) -> None:
         self.bird_solenoid.set(DoubleSolenoid.Value.kReverse)
@@ -60,37 +66,54 @@ class GrabberSubsystem(Subsystem):
     
     def toggleBird(self) -> None:
         self.bird_solenoid.toggle()
-    
-    def getBirdState(self) -> DoubleSolenoid.Value:
-        return self.bird_solenoid.get()
 
 
 
     @property
     def grabber_angle(self):
-        return self.encoder.get()
+        return self.encoderValToAngle(self.encoder.get())
     
     @grabber_angle.setter
     def grabber_angle(self, angle: float):
-        self.target_angle = angle
+        if angle > self.upper_limit_val_closed and not self.grabber_open:
+            self.grabber_angle = self.upper_limit_val_closed
+        elif angle > self.upper_limit_val_open and self.grabber_open:
+            self.grabber_angle = self.upper_limit_val_open
+        elif angle < self.lower_limit_val:
+            self.grabber_angle = self.lower_limit_val
+        else:
+            self.target_angle = angle
+
+    def angleToEncoderVal(self, angle: float):
+        return (-angle / 360) + 0.590
+
+    def encoderValToAngle(self, val: float):
+        return -(val - 0.590) * 360
     
     def stopMotor(self) -> None:
         self.motor.set(0)
 
     def move(self, speed: float) -> None:
-        if abs(speed) <= 0.001:
-            if abs(self.last_input) <= 0.001:
-                pass
-            elif abs(self.last_input) > 0.001:
-                self.target_angle = self.grabber_angle
-        else:
-            self.target_angle += 0.525 * speed
-        
+        self.grabber_angle = self.target_angle + (2 * speed)
+
+
+
     def periodic(self) -> None:
         self.pid.setSetpoint(self.target_angle)
         current_angle = self.grabber_angle
         speed = self.pid.calculate(current_angle)
 
+        if abs(speed) > 1:
+            speed /= abs(speed)
+
         self.motor.set(speed)
 
-        print(self.grabber_angle)
+        # print(self.grabber_angle)
+
+@dataclass
+class GrabberPresets:
+    START = 110
+    STORE = 105
+    REEF_GRAB = 40
+    PROCESSOR = -20
+    BIRD = 80
