@@ -21,13 +21,15 @@ class GrabberSubsystem(Subsystem):
 
         self.upper_limit_val_closed = 127
         self.upper_limit_val_open = 110
-        self.lower_limit_val = -54
+        self.lower_limit_val_extended = 85
+        self.lower_limit_val_retracted = -54
+
+        self.grabber_open = False
+        self.bird_extended = False
 
         self.target_angle = self.grabber_angle
         self.grabber_angle = self.grabber_angle
 
-        self.grabber_open = False
-        self.bird_extended = False
         self.closeGrabber()
         self.retractBird()
 
@@ -57,13 +59,19 @@ class GrabberSubsystem(Subsystem):
             self.openGrabber()
     
     def extendBird(self) -> None:
-        self.bird_solenoid.set(DoubleSolenoid.Value.kReverse)
+        if self.grabber_angle >= self.lower_limit_val_extended and self.target_angle >= self.lower_limit_val_extended:
+            self.bird_solenoid.set(DoubleSolenoid.Value.kReverse)
+            self.bird_extended = True
     
     def retractBird(self) -> None:
         self.bird_solenoid.set(DoubleSolenoid.Value.kForward)
+        self.bird_extended = False
     
     def toggleBird(self) -> None:
-        self.bird_solenoid.toggle()
+        if self.bird_extended:
+            self.retractBird()
+        else:
+            self.extendBird()
 
 
 
@@ -73,12 +81,14 @@ class GrabberSubsystem(Subsystem):
     
     @grabber_angle.setter
     def grabber_angle(self, angle: float):
-        if angle > self.upper_limit_val_closed and not self.grabber_open:
-            self.grabber_angle = self.upper_limit_val_closed
-        elif angle > self.upper_limit_val_open and self.grabber_open:
+        if angle > self.upper_limit_val_open and self.grabber_open:
             self.grabber_angle = self.upper_limit_val_open
-        elif angle < self.lower_limit_val:
-            self.grabber_angle = self.lower_limit_val
+        elif angle > self.upper_limit_val_closed and not self.grabber_open:
+            self.grabber_angle = self.upper_limit_val_closed
+        elif angle < self.lower_limit_val_extended and self.bird_extended:
+            self.grabber_angle = self.lower_limit_val_extended
+        elif angle < self.lower_limit_val_retracted and not self.bird_extended:
+            self.grabber_angle = self.lower_limit_val_retracted
         else:
             self.target_angle = angle
 
@@ -114,4 +124,4 @@ class GrabberPresets:
     STORE = 105
     REEF_GRAB = 40
     PROCESSOR = -20
-    BIRD = 80
+    BIRD = 90
