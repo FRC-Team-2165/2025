@@ -4,7 +4,7 @@ from components import TargetTracker, Position, LocationDataClientManager, Locat
 from math import degrees, atan
 
 class ApriltagDistanceCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, distance: float, distance_deadband: float):
         super().__init__()
 
         self.subsystem = subsystem
@@ -15,6 +15,9 @@ class ApriltagDistanceCommand(Command):
         self.tracker = TargetTracker(start_pos)
 
         self.has_target = False
+
+        self.distance = distance
+        self.distance_deadband = distance_deadband
 
         self.addRequirements(subsystem)
     
@@ -42,13 +45,13 @@ class ApriltagDistanceCommand(Command):
             rot_speed = 0
 
             relative_pos = self.tracker.getTargetRelativePosition()
-            if relative_pos.x > 0.25:
+            if relative_pos.x > self.distance_deadband:
                 x_speed = -0.5
-            elif relative_pos.x < -0.25:
+            elif relative_pos.x < -self.distance_deadband:
                 x_speed = 0.5
-            if  relative_pos.y > 0.25:
+            if  relative_pos.y > self.distance_deadband:
                 y_speed = 0.5
-            elif relative_pos.y < -0.25:
+            elif relative_pos.y < -self.distance_deadband:
                 y_speed = -0.5
             
             self.subsystem.drive(x_speed, y_speed, rot_speed)

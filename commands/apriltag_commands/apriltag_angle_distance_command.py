@@ -4,7 +4,7 @@ from components import TargetTracker, Position, LocationDataClientManager, Locat
 from math import degrees, atan
 
 class ApriltagAngleCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, angle: float, angle_deadband: float):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, distance: float, distance_deadband: float, angle: float, angle_deadband: float):
         super().__init__()
 
         self.subsystem = subsystem
@@ -15,7 +15,9 @@ class ApriltagAngleCommand(Command):
         self.tracker = TargetTracker(start_pos)
 
         self.has_target = False
-        
+
+        self.distance = distance
+        self.distance_deadband = distance_deadband
         self.angle = angle
         self.angle_deadband = angle_deadband
 
@@ -32,7 +34,7 @@ class ApriltagAngleCommand(Command):
                 i: Location
                 if i.id_num == self.target_id:
                     self.has_target = True
-                    target_pos = Position(i.x, i.y + 2, angle = degrees(atan(i.x/i.y)) + self.angle)
+                    target_pos = Position(i.x, i.y + self.distance, angle = degrees(atan(i.x/i.y)) + self.angle)
                     self.tracker.updateTargetPosition(target_pos)
                     break
         
@@ -45,6 +47,14 @@ class ApriltagAngleCommand(Command):
             rot_speed = 0
 
             relative_pos = self.tracker.getTargetRelativePosition()
+            if relative_pos.x > self.distance_deadband:
+                x_speed = -0.5
+            elif relative_pos.x < -self.distance_deadband:
+                x_speed = 0.5
+            if  relative_pos.y > self.distance_deadband:
+                y_speed = 0.5
+            elif relative_pos.y < -self.distance_deadband:
+                y_speed = -0.5
             if relative_pos.angle > self.angle_deadband:
                 rot_speed = -0.5
             elif relative_pos.angle < -self.angle_deadband:
