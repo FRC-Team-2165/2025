@@ -20,7 +20,7 @@ class GrabberSubsystem(Subsystem):
         self.encoder = wpilib.DutyCycleEncoder(5)
 
         self.upper_limit_val_closed = 127
-        self.upper_limit_val_open = 77
+        self.upper_limit_val_open = 110
         self.lower_limit_val = -54
 
         self.target_angle = self.grabber_angle
@@ -53,10 +53,8 @@ class GrabberSubsystem(Subsystem):
     def toggleGrabber(self) -> None:
         if self.grabber_open:
             self.closeGrabber()
-            self.grabber_open = False
         else:
             self.openGrabber()
-            self.grabber_open = True
     
     def extendBird(self) -> None:
         self.bird_solenoid.set(DoubleSolenoid.Value.kReverse)
