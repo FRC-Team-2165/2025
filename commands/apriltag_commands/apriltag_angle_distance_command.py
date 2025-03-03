@@ -3,8 +3,8 @@ from subsystems import DriveSubsystem
 from components import TargetTracker, Position, LocationDataClientManager, Location
 from math import degrees, atan
 
-class ApriltagAngleCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, distance: float, distance_deadband: float, angle: float, angle_deadband: float):
+class ApriltagAngleDistanceCommand(Command):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, move_distance: bool = False, move_angle: bool = False, distance: float = 0, distance_deadband: float = 0.25, angle: float = 0, angle_deadband: float = 5):
         super().__init__()
 
         self.subsystem = subsystem

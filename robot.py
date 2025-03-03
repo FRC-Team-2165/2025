@@ -16,7 +16,13 @@ from commands import DriveControllerCommand,\
     ToggleSlideCommand,\
     ToggleBirdCommand,\
     GrabberAnglePresetCommand,\
-    ResetDriveCommand
+    ResetDriveCommand,\
+    ApriltagAngleDistanceCommand
+
+from components import LocationDataClientManager
+
+fwd_stream_address = ""
+fwd_stream_port = 0
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -37,10 +43,14 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
         self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
 
-        self.main_controller.povUp().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
-        self.main_controller.povDown().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
-        self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
-        self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
+        self.main_controller.b().and_(self.main_controller.povUp()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
+        self.main_controller.b().and_(self.main_controller.povDown()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
+        self.main_controller.b().and_(self.main_controller.povLeft()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
+        self.main_controller.b().and_(self.main_controller.povRight()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
+
+        self.fwd_stream = LocationDataClientManager(fwd_stream_address, fwd_stream_port)
+
+        self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(ApriltagAngleDistanceCommand(self.drive, self.fwd_stream, 1, move_distance= True, distance= 2))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
