@@ -16,6 +16,9 @@ class ApriltagAngleDistanceCommand(Command):
 
         self.has_target = False
 
+        self.move_distance = move_distance
+        self.move_angle = move_angle
+
         self.distance = distance
         self.distance_deadband = distance_deadband
         self.angle = angle
@@ -47,18 +50,20 @@ class ApriltagAngleDistanceCommand(Command):
             rot_speed = 0
 
             relative_pos = self.tracker.getTargetRelativePosition()
-            if relative_pos.x > self.distance_deadband:
-                x_speed = -0.5
-            elif relative_pos.x < -self.distance_deadband:
-                x_speed = 0.5
-            if  relative_pos.y > self.distance_deadband:
-                y_speed = 0.5
-            elif relative_pos.y < -self.distance_deadband:
-                y_speed = -0.5
-            if relative_pos.angle > self.angle_deadband:
-                rot_speed = -0.5
-            elif relative_pos.angle < -self.angle_deadband:
-                rot_speed = 0.5
+            if self.move_distance:
+                if relative_pos.x > self.distance_deadband:
+                    x_speed = -0.5
+                elif relative_pos.x < -self.distance_deadband:
+                    x_speed = 0.5
+                if  relative_pos.y > self.distance_deadband:
+                    y_speed = 0.5
+                elif relative_pos.y < -self.distance_deadband:
+                    y_speed = -0.5
+            if self.move_angle:
+                if relative_pos.angle > self.angle_deadband:
+                    rot_speed = -0.5
+                elif relative_pos.angle < -self.angle_deadband:
+                    rot_speed = 0.5
             
             self.subsystem.drive(x_speed, y_speed, rot_speed)
         else:
