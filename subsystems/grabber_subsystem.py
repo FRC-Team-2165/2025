@@ -19,7 +19,7 @@ class GrabberSubsystem(Subsystem):
 
         self.encoder = wpilib.DutyCycleEncoder(5)
 
-        self.upper_limit_val_closed = 127
+        self.upper_limit_val_closed = 120
         self.upper_limit_val_open = 110
         self.lower_limit_val_extended = 85
         self.lower_limit_val_retracted = -54
@@ -122,6 +122,6 @@ class GrabberSubsystem(Subsystem):
 class GrabberPresets:
     START = 110
     STORE = 105
-    REEF_GRAB = 40
+    REEF_GRAB = 45
     PROCESSOR = -20
     BIRD = 90

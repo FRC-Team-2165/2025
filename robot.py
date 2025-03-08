@@ -35,7 +35,7 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
         self.main_controller.x().onTrue(ToggleSlideCommand(self.slide))
         self.main_controller.y().onTrue(ToggleBirdCommand(self.grabber))
-        self.main_controller.b().onTrue(BirdCatchCommand(self.grabber))
+        self.main_controller.b().onTrue(BirdCatchCommand(self.grabber, self.slide))
         self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
         self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
 
