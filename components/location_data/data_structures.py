@@ -27,8 +27,8 @@ def jsonToLocation(data):
     output = []
     for i in data:
         location = Location(i["x"],\
-          i["y"],\
           i["z"],\
+          i["y"],\
           i["width"],\
           i["height"],\
           i["yaw"],\

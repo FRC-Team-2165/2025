@@ -10,10 +10,10 @@ class Position:
 
     def __add__(self, pos: "Position"):
         output = Position()
-        output.x = self.x, pos.x
-        output.y = self.y, pos.y
-        output.z = self.z, pos.z
-        output.angle = self.angle, pos.angle
+        output.x = self.x + pos.x
+        output.y = self.y + pos.y
+        output.z = self.z + pos.z
+        output.angle = self.angle + pos.angle
         return output
 
 class TargetTracker:
@@ -31,6 +31,7 @@ class TargetTracker:
             relative_pos.angle = angle
             relative_pos.x = math.cos(angle) * hyp
             relative_pos.y = math.sin(angle) * hyp
+            print(angle)
 
             self.target_pos = self.current_pos + relative_pos
         else:
@@ -46,5 +47,5 @@ class TargetTracker:
         output.x = max(current.x, target.x) - min(current.x, target.x)
         output.y = max(current.y, target.y) - min(current.y, target.y)
         output.z = max(current.z, target.z) - min(current.z, target.z)
-        output.angle = max(current.angle, target.angle) - min(current.angle, target.angle)
+        output.angle = target.angle - current.angle
         return output

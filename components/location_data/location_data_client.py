@@ -1,11 +1,9 @@
 from threading import Thread, Event, Lock
 import socket
 import select
-from time import time
+from time import time, sleep
 
-from data_structures import jsonToLocation, Location
-
-#TODO fix reconnection and errors
+from components.location_data.data_structures import jsonToLocation, Location
 
 socket.setdefaulttimeout(1)
 
@@ -38,6 +36,10 @@ class LocationDataClient:
         self.last_reconnect = time()
 
         self.temp = 0
+
+        self.last_time = time()
+
+        self.old_data = []
     
 
 
@@ -49,6 +51,9 @@ class LocationDataClient:
     @location_data.setter
     def location_data(self, data: list[Location]):
         with self.data_lock:
+            if data != self.old_data:
+                print("updated at " + str(self.last_time - time()))
+                self.last_time = time()
             self._data = data
     
 
@@ -110,13 +115,14 @@ class LocationDataClient:
         """
         while not self.kill_threads.is_set():
             if self.listening.is_set():
-                rlist, wlist, xlist = select.select([self.socket], [self.socket], [], 0.25)
+                rlist, wlist, xlist = select.select([self.socket], [self.socket], [], 0.000001)
                 if rlist == [] and wlist == []:
                     if self.temp < 100:
                         self.temp += 1
                         continue
                     else:
                         self.error.set()
+                    sleep(0.008)
                 else:
                     try:
                         self.temp = 0
@@ -159,6 +165,7 @@ class LocationDataClient:
                         self.reconnect_delay = self.reconnect_delay * 2
                         print(f"error\n\nreconnect delay: {self.reconnect_delay}\n")
                         self.error.set()
+            sleep(0.008)
 
 class LocationDataClientManager:
     def __init__(self, address: str, port: int):
@@ -184,6 +191,8 @@ class LocationDataClientManager:
             self.listen_counter = 0
             if self.LDC.listening.is_set():
                 self.LDC.stopRequest()
+                self.LDC.location_data = []
+                print("stopped")
     
     def disconnectRequest(self):
         self.LDC.disconnectRequest()

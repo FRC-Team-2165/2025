@@ -17,12 +17,18 @@ from commands import DriveControllerCommand,\
     ToggleBirdCommand,\
     GrabberAnglePresetCommand,\
     ResetDriveCommand,\
-    ApriltagAngleDistanceCommand
+    AngleTrackCommand
 
 from components import LocationDataClientManager
 
-fwd_stream_address = ""
-fwd_stream_port = 0
+fwd_upper_stream_address = "vision-2165-working.local"
+fwd_upper_stream_port = 1181
+
+fwd_lower_stream_address = "vision-2165-working.local"
+fwd_lower_stream_port = 1183
+
+grabber_stream_address = "vision-2165-working.local"
+grabber_stream_port = 1185
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -43,17 +49,20 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
         self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
 
-        self.main_controller.b().and_(self.main_controller.povUp()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
-        self.main_controller.b().and_(self.main_controller.povDown()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
-        self.main_controller.b().and_(self.main_controller.povLeft()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
-        self.main_controller.b().and_(self.main_controller.povRight()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
+        self.main_controller.povUp().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
+        self.main_controller.povDown().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
+        self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
+        self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
-        self.fwd_stream = LocationDataClientManager(fwd_stream_address, fwd_stream_port)
+        self.fwd_upper_stream = LocationDataClientManager(fwd_upper_stream_address, fwd_upper_stream_port)
+        self.fwd_lower_stream = LocationDataClientManager(fwd_lower_stream_address, fwd_lower_stream_port)
+        self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
 
-        self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(ApriltagAngleDistanceCommand(self.drive, self.fwd_stream, 1, move_distance= True, distance= 2))
+        self.main_controller.a().whileTrue(AngleTrackCommand(self.drive, self.fwd_upper_stream, 1))
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
+        pass
     
     def autonomousInit(self):
         return super().autonomousInit()
