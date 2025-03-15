@@ -113,39 +113,8 @@ class LocationDataClient:
         """
         thread function for listening for data from the location data server
         """
+        buffer = bytearray(5)
         while not self.kill_threads.is_set():
-            if self.listening.is_set():
-                rlist, wlist, xlist = select.select([self.socket], [self.socket], [], 0.000001)
-                if rlist == [] and wlist == []:
-                    if self.temp < 100:
-                        self.temp += 1
-                        continue
-                    else:
-                        self.error.set()
-                    sleep(0.008)
-                else:
-                    try:
-                        self.temp = 0
-                        byte_data = self.socket.recv(1)
-                        if not byte_data:
-                            raise IOError
-                        data_id = int.from_bytes(byte_data)
-
-                        byte_data = self.socket.recv(self.size_bytes)
-                        if not byte_data:
-                            raise IOError
-                        size = int.from_bytes(byte_data)
-
-                        byte_data = self.socket.recv(size)
-                        if not byte_data:
-                            raise IOError
-                        data = byte_data.decode()
-
-                        if data_id == self.START:
-                            self.location_data = jsonToLocation(data)
-                    except:
-                        self.error.set()
-            
             if self.error.is_set() and not self.disconnected.is_set():
                 current_time = time()
                 if abs(self.last_reconnect - current_time) >= self.reconnect_delay:
@@ -165,7 +134,37 @@ class LocationDataClient:
                         self.reconnect_delay = self.reconnect_delay * 2
                         print(f"error\n\nreconnect delay: {self.reconnect_delay}\n")
                         self.error.set()
-            sleep(0.008)
+                        # Failure to (re)connect implies we are not listening.
+                        continue
+
+            if self.listening.is_set():
+                rlist, wlist, xlist = select.select([self.socket], [], [], 0.000001)
+                if len(rlist) > 0: # implies self.socket is ready to read
+                    try:
+                        #  self.temp = 0
+                        n_read = self.socket.recv_into(buffer, 5)
+                        if n_read == 0 or buffer[0] != self.START:
+                            raise IOError
+                        size = int.from_bytes(buffer[1:])
+                        if size > len(buffer):
+                            buffer = bytearray(size);
+
+                        bytes_read = 0
+                        while bytes_read < size:
+                            n = self.socket.recv_into(buffer[bytes_read:], size - bytes_read)
+                            if n == 0:
+                                raise IOError
+                            bytes_read += n
+                        #  data = byte_data.decode()
+                        self.location_data = jsonToLocation(buffer[:size].decode())
+
+                    except:
+                        self.error.set()
+                else:
+                    sleep(0.008)
+            else:
+                # wait half an iteration of the robot to check if listening.
+                sleep(0.01)
 
 class LocationDataClientManager:
     def __init__(self, address: str, port: int):
