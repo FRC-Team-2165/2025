@@ -19,6 +19,8 @@ from commands import DriveControllerCommand,\
     ResetDriveCommand,\
     BirdCatchCommand
 
+from commands import AlgaeFromCenterCommand
+
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
         self.main_controller = button.CommandXboxController(0)
@@ -44,17 +46,21 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
         self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
+        self.auto_command = AlgaeFromCenterCommand(self.drive, self.grabber)
+
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
     
     def autonomousInit(self):
-        return super().autonomousInit()
+        self.auto_command.schedule()
     
     def autonomousPeriodic(self):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
         self.grabber.grabber_angle = self.grabber.grabber_angle
+        if self.auto_command is not None and self.auto_command.isScheduled():
+            self.auto_command.cancel()
     
     def teleopPeriodic(self):
         return super().teleopPeriodic()
