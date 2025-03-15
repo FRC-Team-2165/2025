@@ -21,7 +21,8 @@ class AlgaeFromCenterCommand(Command):
         self.drive.resetPosition()
 
         self.grabber_opened = False
-        self.grabber_closed = False
+
+        self.grabber.grabber_angle = self.grabber.presets.BIRD
 
         self.angle_timer.reset()
         self.angle_timer.start()
@@ -36,31 +37,27 @@ class AlgaeFromCenterCommand(Command):
         elif angle > 85:
             rot_speed = -0.2
         
-        pos = self.drive.getPosition()
         y_speed = 0
-        if abs(pos.X()) > 1.5:
-            if not self.grabber_closed:
-                self.grabber_closed = True
-                self.grabber.closeGrabber()
-                self.grabber.grabber_angle = self.grabber.presets.STORE
-            y_speed = -0.5
         if self.angle_timer.hasElapsed(1):
             if not self.grabber_opened:
                 self.grabber_opened = True
-                self.grabber.openGrabber()
                 self.grabber.grabber_angle = self.grabber.presets.REEF_GRAB
-            y_speed = 0.5
+                self.grabber.openGrabber()
+            y_speed = 0.4
 
         self.drive.drive(0, y_speed, rot_speed)
     
 
     def end(self, interrupted):
         self.drive.stop()
+        self.grabber.closeGrabber()
+        self.grabber.grabber_angle = self.grabber.presets.STORE
+
         self.angle_timer.stop()
         self.angle_timer.reset()
     
 
     def isFinished(self):
         pos = self.drive.getPosition()
-        if abs(pos.X()) < 1 and self.grabber_closed:
+        if abs(pos.X()) > 1.5:
             return True

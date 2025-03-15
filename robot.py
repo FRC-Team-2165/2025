@@ -19,7 +19,10 @@ from commands import DriveControllerCommand,\
     ResetDriveCommand,\
     BirdCatchCommand
 
-from commands import AlgaeFromCenterCommand
+from commands import AutoGrabberAngleCommand,\
+    AutoDriveCommand,\
+    AutoGrabCommand,\
+    AutoReleaseCommand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -46,7 +49,18 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
         self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
-        self.auto_command = AlgaeFromCenterCommand(self.drive, self.grabber)
+        self.auto_command = commands2.SequentialCommandGroup(
+            AutoDriveCommand(self.drive, angle=90, reset_angle= True),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.REEF_GRAB),
+            commands2.ParallelCommandGroup(
+                AutoDriveCommand(self.drive, y_dist= 1.5, move_speed= 0.4),
+                AutoReleaseCommand(self.grabber)
+            ),
+            commands2.WaitCommand(0.25),
+            AutoGrabCommand(self.grabber),
+            commands2.WaitCommand(0.5),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.STORE)
+        )
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()

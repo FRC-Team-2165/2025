@@ -10,4 +10,7 @@ from .grabber_angle_preset_command import GrabberAnglePresetCommand
 from .reset_drive_command import ResetDriveCommand
 from .bird_catch_command import BirdCatchCommand
 
-from .auto.algae_from_center_command import AlgaeFromCenterCommand
+from .auto.auto_drive_command import AutoDriveCommand
+from .auto.auto_grab_command import AutoGrabCommand
+from .auto.auto_release_command import AutoReleaseCommand
+from .auto.auto_grabber_angle_command import AutoGrabberAngleCommand
