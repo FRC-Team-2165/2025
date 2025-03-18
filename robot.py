@@ -22,7 +22,9 @@ from commands import DriveControllerCommand,\
 from commands import AutoGrabberAngleCommand,\
     AutoDriveCommand,\
     AutoGrabCommand,\
-    AutoReleaseCommand
+    AutoReleaseCommand,\
+    AutoLoadCommand,\
+    AutoDumpCommand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -49,18 +51,29 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
         self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
-        self.auto_command = commands2.SequentialCommandGroup(
+        self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
             AutoGrabberAngleCommand(self.grabber, self.grabber.presets.REEF_GRAB),
-            commands2.ParallelCommandGroup(
-                AutoDriveCommand(self.drive, y_dist= 1.5, move_speed= 0.4),
-                AutoReleaseCommand(self.grabber)
-            ),
+            commands2.WaitCommand(0.25),
+            AutoReleaseCommand(self.grabber),
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3),
             commands2.WaitCommand(0.25),
             AutoGrabCommand(self.grabber),
             commands2.WaitCommand(0.5),
-            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.STORE)
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.STORE),
+            commands2.WaitCommand(0.5),
+            AutoDriveCommand(self.drive, y_dist= -0.5, move_speed= 0.3),
+            AutoDriveCommand(self.drive, angle= -90),
+            AutoDriveCommand(self.drive, y_dist= 0.55, move_speed= 0.3),
+            AutoDriveCommand(self.drive, x_dist= 0.05, move_speed= 0.15),
+            AutoDumpCommand(self.slide)
         )
+
+        self.auto_leave = commands2.SequentialCommandGroup(
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3)
+        )
+
+        self.auto_command = self.auto_leave_algae_coral
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()

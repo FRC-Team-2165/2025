@@ -47,7 +47,7 @@ class AutoDriveCommand(Command):
             self.y_met = True
         if abs(pos.Y()) > abs(self.x_dist):
             self.x_met = True
-        if abs(angle) - abs(self.target_angle) < self.angle_deadband:
+        if abs(angle - self.target_angle) < self.angle_deadband:
             self.angle_met = True
         else:
             self.angle_met = False
@@ -55,15 +55,18 @@ class AutoDriveCommand(Command):
         x_speed = 0
         if not self.x_met:
             x_err = self.x_dist - pos.X()
-            x_speed = (x_err / abs(x_err)) * self.speed
+            if x_err != 0:
+                x_speed = (x_err / abs(x_err)) * self.move_speed
         y_speed = 0
         if not self.y_met:
             y_err = self.y_dist - pos.Y()
-            y_speed = (y_err / abs(y_err)) * self.speed
+            if y_err != 0:
+                y_speed = (y_err / abs(y_err)) * self.move_speed
         rot_speed = 0
         if not self.angle_met:
             angle_err = self.target_angle - angle
-            rot_speed = (angle_err / abs(angle_err)) * self.turn_speed
+            if angle_err != 0:
+                rot_speed = (angle_err / abs(angle_err)) * self.turn_speed
         self.subsystem.drive(x_speed, y_speed, rot_speed)
             
     
