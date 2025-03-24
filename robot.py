@@ -65,12 +65,19 @@ class Robot(wpilib.TimedRobot):
             AutoDriveCommand(self.drive, y_dist= -0.5, move_speed= 0.3),
             AutoDriveCommand(self.drive, angle= -90),
             AutoDriveCommand(self.drive, y_dist= 0.55, move_speed= 0.3),
+            commands2.ParallelCommandGroup(
             AutoDriveCommand(self.drive, x_dist= 0.05, move_speed= 0.15),
             AutoDumpCommand(self.slide)
+            ),
+            commands2.WaitCommand(0.5),
+            AutoDriveCommand(self.drive, y_dist= -0.5, angle= 180, turn_speed= 0.4, angle_deadband= 10),
+            AutoDriveCommand(self.drive, reset_angle= True)
         )
 
         self.auto_leave = commands2.SequentialCommandGroup(
-            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3)
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3),
+            AutoDriveCommand(self.drive, angle= 180),
+            AutoDriveCommand(self.drive, reset_angle= True)
         )
 
         self.auto_command = self.auto_leave_algae_coral
