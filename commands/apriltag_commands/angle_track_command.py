@@ -2,9 +2,10 @@ from commands2 import Command
 from subsystems import DriveSubsystem
 from components import LocationDataClientManager, Location
 from math import degrees, atan
+from time import process_time
 
 class AngleTrackCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, loss_timeout = 0.2):
         super().__init__()
         self.subsystem = subsystem
         self.stream = location_stream
@@ -14,6 +15,9 @@ class AngleTrackCommand(Command):
         self.target_angle = 0
 
         self.deadband = 5
+        self.loss_timeout = loss_timeout
+        self.last_seen = process_time()
+        self.rot_speed = 0
 
         self.addRequirements(subsystem)
 
@@ -34,19 +38,23 @@ class AngleTrackCommand(Command):
                 self.target_angle = degrees(atan(i.x / i.y)) + self.subsystem.getAngle()
                 break
         
-        if self.has_target:
+        if self.has_target or process_time() - self.last_seen < self.loss_timeout:
             current = self.subsystem.getAngle()
             target = self.target_angle
+            self.last_seen = process_time()
 
             rot_speed = 0
             if abs(current - target) < self.deadband:
                 pass
             else:
                 error = target - current
-                rot_speed = error / abs(error) * 0.25
-            self.subsystem.drive(0, 0, rot_speed)
+                rot_speed = error / abs(error) * 0.2
+            self.rot_speed = rot_speed
+            # self.subsystem.drive(0, 0, rot_speed)
         else:
-            self.subsystem.stop()
+            self.rot_speed = 0
+            # self.subsystem.stop()
+        self.subsystem.drive(0,0, self.rot_speed)
     
 
     def end(self, interrupted):

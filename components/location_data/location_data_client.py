@@ -52,7 +52,7 @@ class LocationDataClient:
     def location_data(self, data: list[Location]):
         with self.data_lock:
             if data != self.old_data:
-                print("updated at " + str(self.last_time - time()))
+                # print("updated at " + str(time() - self.last_time))
                 self.last_time = time()
             self._data = data
     
@@ -76,6 +76,7 @@ class LocationDataClient:
             self.socket.send(int(self.START).to_bytes(1))
             self.listening.set()
         except:
+            print("error sending START")
             self.error.set()
 
     def stopRequest(self):
@@ -83,9 +84,10 @@ class LocationDataClient:
         send the stop request
         """
         try:
-            self.socket.send(int(self.STOP).to_bytes(1))
             self.listening.clear()
+            self.socket.send(int(self.STOP).to_bytes(1))
         except:
+            print("error sending STOP")
             self.error.set()
 
     def disconnectRequest(self):
@@ -96,6 +98,7 @@ class LocationDataClient:
             self.socket.send(int(self.DISCONNECT).to_bytes(1))
             self.disconnected.set()
         except:
+            print("error sending DISCONNECT")
             self.error.set()
 
     def statusRequest(self):
@@ -105,6 +108,7 @@ class LocationDataClient:
         try:
             self.socket.send(int(self.STATUS).to_bytes(1))
         except:
+            print("error sending STATUS")
             self.error.set()
 
 
@@ -140,25 +144,36 @@ class LocationDataClient:
             if self.listening.is_set():
                 rlist, wlist, xlist = select.select([self.socket], [], [], 0.000001)
                 if len(rlist) > 0: # implies self.socket is ready to read
+
                     try:
                         #  self.temp = 0
                         n_read = self.socket.recv_into(buffer, 5)
-                        if n_read == 0 or buffer[0] != self.START:
+                        if n_read == 0:
+                            print("not enough bytes for header")
                             raise IOError
-                        size = int.from_bytes(buffer[1:])
+                        elif buffer[0] != self.START:
+                            print("invalid starting byte")
+                            raise IOError
+                        size = int.from_bytes(buffer[1:5])
                         if size > len(buffer):
-                            buffer = bytearray(size);
+                            buffer = bytearray(size)
 
-                        bytes_read = 0
-                        while bytes_read < size:
-                            n = self.socket.recv_into(buffer[bytes_read:], size - bytes_read)
-                            if n == 0:
-                                raise IOError
-                            bytes_read += n
+                        # bytes_read = 0
+                        # while bytes_read < size:
+                        #     n = self.socket.recv_into(buffer[bytes_read:], size - bytes_read)
+                        #     if n == 0:
+                        #         print("no bytes read in body")
+                        #         raise IOError
+                        #     bytes_read += n
+                        message = self.socket.recv(size)
                         #  data = byte_data.decode()
-                        self.location_data = jsonToLocation(buffer[:size].decode())
+                        loc = jsonToLocation(message[:size].decode())
+                        if loc is None:
+                            continue
+                        self.location_data = loc
 
-                    except:
+                    except OSError as e:
+                        print(e)
                         self.error.set()
                 else:
                     sleep(0.008)

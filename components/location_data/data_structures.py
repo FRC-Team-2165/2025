@@ -25,6 +25,8 @@ def jsonToLocation(data):
     """
     data = json.loads(data)
     output = []
+    # if len(data) == 0:
+    #     print("nothing found")
     for i in data:
         location = Location(i["x"],\
           i["z"],\
