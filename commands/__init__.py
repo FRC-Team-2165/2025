@@ -11,3 +11,11 @@ from .reset_drive_command import ResetDriveCommand
 
 from .apriltag_commands.apriltag_angle_distance_command import ApriltagAngleDistanceCommand
 from .apriltag_commands.angle_track_command import AngleTrackCommand
+from .bird_catch_command import BirdCatchCommand
+
+from .auto.auto_drive_command import AutoDriveCommand
+from .auto.auto_grab_command import AutoGrabCommand
+from .auto.auto_release_command import AutoReleaseCommand
+from .auto.auto_grabber_angle_command import AutoGrabberAngleCommand
+from .auto.auto_load_command import AutoLoadCommand
+from .auto.auto_dump_command import AutoDumpCommand

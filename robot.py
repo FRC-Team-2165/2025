@@ -17,6 +17,15 @@ from commands import DriveControllerCommand,\
     ToggleBirdCommand,\
     GrabberAnglePresetCommand,\
     ResetDriveCommand,\
+    BirdCatchCommand
+
+from commands import AutoGrabberAngleCommand,\
+    AutoDriveCommand,\
+    AutoGrabCommand,\
+    AutoReleaseCommand,\
+    AutoLoadCommand,\
+    AutoDumpCommand,\
+    ResetDriveCommand,\
     AngleTrackCommand
 
 from components import LocationDataClientManager
@@ -46,6 +55,7 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.rightBumper().onTrue(TogglePickerCommand(self.picker))
         self.main_controller.x().onTrue(ToggleSlideCommand(self.slide))
         self.main_controller.y().onTrue(ToggleBirdCommand(self.grabber))
+        self.main_controller.b().onTrue(BirdCatchCommand(self.grabber, self.slide))
         self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
         self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
 
@@ -60,18 +70,44 @@ class Robot(wpilib.TimedRobot):
 
         self.main_controller.a().whileTrue(AngleTrackCommand(self.drive, self.fwd_upper_stream, 1))
 
+        self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
+            AutoDriveCommand(self.drive, angle=90, reset_angle= True),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.REEF_GRAB),
+            commands2.WaitCommand(0.25),
+            AutoReleaseCommand(self.grabber),
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3),
+            commands2.WaitCommand(0.25),
+            AutoGrabCommand(self.grabber),
+            commands2.WaitCommand(0.5),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.STORE),
+            commands2.WaitCommand(0.5),
+            AutoDriveCommand(self.drive, y_dist= -0.5, move_speed= 0.3),
+            AutoDriveCommand(self.drive, angle= -90),
+            AutoDriveCommand(self.drive, y_dist= 0.55, move_speed= 0.3),
+            AutoDriveCommand(self.drive, x_dist= 0.05, move_speed= 0.15),
+            AutoDumpCommand(self.slide)
+        )
+
+        self.auto_leave = commands2.SequentialCommandGroup(
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3)
+        )
+
+        self.auto_command = self.auto_leave_algae_coral
+
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
         pass
     
     def autonomousInit(self):
-        return super().autonomousInit()
+        self.auto_command.schedule()
     
     def autonomousPeriodic(self):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
         self.grabber.grabber_angle = self.grabber.grabber_angle
+        if self.auto_command is not None and self.auto_command.isScheduled():
+            self.auto_command.cancel()
     
     def teleopPeriodic(self):
         return super().teleopPeriodic()

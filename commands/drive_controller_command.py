@@ -16,16 +16,19 @@ class DriveControllerCommand(Command):
         return super().initialize()
 
     def execute(self):
+        if self.controller.a():
+            self.drive.speed_modifier = 0.5
+        else:
+            self.drive.speed_modifier = 1
+
         drive_x = self.controller.getLeftX() * self.drive.speed_modifier
+        drive_x *= abs(drive_x)
         drive_y = -self.controller.getLeftY() * self.drive.speed_modifier
+        drive_y *= abs(drive_y)
         rotate = self.controller.getRightX() * self.drive.speed_modifier
 
         rotate = applyDeadband(rotate, 0.3)
 
-        if self.controller.getRightTriggerAxis() > 0.5:
-            self.drive.speed_modifier = 1
-        else:
-            self.drive.speed_modifier = 0.7
 
         # print(f"controller x: {drive_x}, controller y: {drive_y}, controller rotate: {rotate}")
 
