@@ -17,14 +17,14 @@ class DriveControllerCommand(Command):
 
     def execute(self):
         if self.controller.a():
-            self.drive.speed_modifier = 0.5
+            self.drive.speed_modifier = 0.25
         else:
             self.drive.speed_modifier = 1
 
-        drive_x = self.controller.getLeftX() * self.drive.speed_modifier
-        drive_x *= abs(drive_x)
-        drive_y = -self.controller.getLeftY() * self.drive.speed_modifier
-        drive_y *= abs(drive_y)
+        drive_x = self.controller.getLeftX()
+        drive_x *= abs(drive_x) * self.drive.speed_modifier
+        drive_y = -self.controller.getLeftY()
+        drive_y *= abs(drive_y) * self.drive.speed_modifier
         rotate = self.controller.getRightX() * self.drive.speed_modifier
 
         rotate = applyDeadband(rotate, 0.3)
