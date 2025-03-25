@@ -13,6 +13,8 @@ from .apriltag_commands.apriltag_angle_distance_command import ApriltagAngleDist
 from .apriltag_commands.angle_track_command import AngleTrackCommand
 from .bird_catch_command import BirdCatchCommand
 
+from .apriltag_commands.goto_tag_command import GotoTagCommand
+
 from .auto.auto_drive_command import AutoDriveCommand
 from .auto.auto_grab_command import AutoGrabCommand
 from .auto.auto_release_command import AutoReleaseCommand
