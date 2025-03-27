@@ -22,9 +22,11 @@ class DriveSubsystem(Subsystem):
         self.rotationLimiter = SlewRateLimiter(1.8)
 
         self.gyro = navx.AHRS(navx.AHRS.NavXComType.kMXP_SPI)
-        self.swervedrive = drive.SwerveDrive(front_left, front_right, rear_left, rear_right, 0.1)
+        self.deadband = 0.1
+        self.swervedrive = drive.SwerveDrive(front_left, front_right, rear_left, rear_right, self.deadband)
 
         self.yaw_offset = starting_angle
+        self.yaw_reference = starting_angle
         self.roll_error = self.gyro.getRoll()
         self.pitch_error = self.gyro.getPitch()
 
@@ -36,6 +38,14 @@ class DriveSubsystem(Subsystem):
         xSpeed = self.xLimiter.calculate(xSpeed)
         ySpeed = self.yLimiter.calculate(ySpeed)
         rotation = self.rotationLimiter.calculate(rotation)
+
+        if abs(rotation) < self.deadband:
+            current = self.getAngle()
+            error = current - self.yaw_reference
+            p = 1/5
+            rotation = error * p + 0.1 * (error / abs(error))
+        else:
+            self.yaw_reference = self.getAngle()
 
         # print(f"x: {xSpeed} y: {ySpeed}")
 
@@ -58,6 +68,7 @@ class DriveSubsystem(Subsystem):
     
     def resetAngle(self):
         self.yaw_offset = self.gyro.getAngle()
+        self.yaw_reference = self.yaw_offset
     
     def getPitch(self):
         return self.gyro.getPitch() - self.pitch_error
