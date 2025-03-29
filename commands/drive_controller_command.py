@@ -16,7 +16,7 @@ class DriveControllerCommand(Command):
         return super().initialize()
 
     def execute(self):
-        if self.controller.a():
+        if self.controller.leftStick():
             self.drive.speed_modifier = 0.25
         else:
             self.drive.speed_modifier = 1

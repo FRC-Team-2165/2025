@@ -60,16 +60,18 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.leftTrigger().whileTrue(SpitPickerCommand(self.picker))
         self.main_controller.rightTrigger().whileTrue(IntakePickerCommand(self.picker))
 
-        self.main_controller.povUp().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
-        self.main_controller.povDown().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
-        self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
-        self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
+        self.main_controller.povUp().and_(self.main_controller.a().not_()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.BIRD))
+        self.main_controller.povDown().and_(self.main_controller.a().not_()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
+        self.main_controller.povLeft().and_(self.main_controller.a().not_()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
+        self.main_controller.povRight().and_(self.main_controller.a().not_()).onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
 
         self.fwd_upper_stream = LocationDataClientManager(fwd_upper_stream_address, fwd_upper_stream_port)
         self.fwd_lower_stream = LocationDataClientManager(fwd_lower_stream_address, fwd_lower_stream_port)
         self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
 
-        self.main_controller.a().whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 7, drive_proportional= 1, y_offset= 1))
+        self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/2, y_offset= 0, ignore_x= True))
+        self.main_controller.a().and_(self.main_controller.povLeft()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/3, y_offset= 0.5, x_offset= 0.25))
+        self.main_controller.a().and_(self.main_controller.povRight()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/3, y_offset= 0.5, x_offset= -0.25))
 
         self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
