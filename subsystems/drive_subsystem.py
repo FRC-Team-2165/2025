@@ -26,7 +26,7 @@ class DriveSubsystem(Subsystem):
         self.swervedrive = drive.SwerveDrive(front_left, front_right, rear_left, rear_right, self.deadband)
 
         self.yaw_offset = starting_angle
-        self.yaw_reference = self.getAngle()
+        self.yaw_reference = starting_angle
         self.roll_error = self.gyro.getRoll()
         self.pitch_error = self.gyro.getPitch()
 
@@ -39,13 +39,11 @@ class DriveSubsystem(Subsystem):
         ySpeed = self.yLimiter.calculate(ySpeed)
         rotation = self.rotationLimiter.calculate(rotation)
 
-        #NOTE if robot spins out of control, it's this block
         if abs(rotation) < self.deadband:
             current = self.getAngle()
-            error = self.yaw_reference - current
-            p = 1/90
-            if error != 0:
-                rotation = error * p + 0.1 * (error / abs(error))
+            error = current - self.yaw_reference
+            p = 1/5
+            rotation = error * p + 0.1 * (error / abs(error))
         else:
             self.yaw_reference = self.getAngle()
 
@@ -70,7 +68,7 @@ class DriveSubsystem(Subsystem):
     
     def resetAngle(self):
         self.yaw_offset = self.gyro.getAngle()
-        self.yaw_reference = self.getAngle()
+        self.yaw_reference = self.yaw_offset
     
     def getPitch(self):
         return self.gyro.getPitch() - self.pitch_error

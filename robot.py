@@ -108,13 +108,11 @@ class Robot(wpilib.TimedRobot):
     
     def autonomousInit(self):
         self.auto_command.schedule()
-        self.drive.yaw_reference = self.drive.getAngle()
     
     def autonomousPeriodic(self):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
-        self.drive.yaw_reference = self.drive.getAngle()
         self.grabber.grabber_angle = self.grabber.grabber_angle
         if self.auto_command is not None and self.auto_command.isScheduled():
             self.auto_command.cancel()
