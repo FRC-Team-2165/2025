@@ -69,7 +69,7 @@ class Robot(wpilib.TimedRobot):
         self.fwd_lower_stream = LocationDataClientManager(fwd_lower_stream_address, fwd_lower_stream_port)
         self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
 
-        self.main_controller.a().whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 7, drive_proportional= 1, y_offset= 1))
+        self.main_controller.a().whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 7, drive_speed= 0.2, y_offset= -1))
 
         self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
