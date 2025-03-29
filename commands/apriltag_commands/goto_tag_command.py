@@ -41,15 +41,18 @@ class GotoTagCommand(Command):
         data = self.stream.getData()
         self.has_target = False
 
+        valid_targets = []
+
         for i in data:
             i: Location
             if i.id_num == self.target_id:
                 self.has_target = True
                 
-                self.target_pos = Translation2d(i.x, i.y)
-
-                print("got target")
-                break
+                valid_targets.append(Translation2d(i.x, i.y))
+        
+        if self.has_target:
+            self.target_pos =  Translation2d().nearest(valid_targets)
+            print("got target")
         
         if self.has_target or abs(process_time() - self.last_seen) < self.loss_timeout:
             x_speed = 0
