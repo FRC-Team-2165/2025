@@ -24,7 +24,21 @@ from commands import AutoGrabberAngleCommand,\
     AutoGrabCommand,\
     AutoReleaseCommand,\
     AutoLoadCommand,\
-    AutoDumpCommand
+    AutoDumpCommand,\
+    ResetDriveCommand,\
+    AngleTrackCommand,\
+    GotoTagCommand
+
+from components import LocationDataClientManager
+
+fwd_upper_stream_address = "vision-2165-working.local"
+fwd_upper_stream_port = 1181
+
+fwd_lower_stream_address = "vision-2165-working.local"
+fwd_lower_stream_port = 1183
+
+grabber_stream_address = "vision-2165-working.local"
+grabber_stream_port = 1185
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -50,6 +64,12 @@ class Robot(wpilib.TimedRobot):
         self.main_controller.povDown().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.PROCESSOR))
         self.main_controller.povLeft().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.STORE))
         self.main_controller.povRight().onTrue(GrabberAnglePresetCommand(self.grabber, self.grabber.presets.REEF_GRAB))
+
+        self.fwd_upper_stream = LocationDataClientManager(fwd_upper_stream_address, fwd_upper_stream_port)
+        self.fwd_lower_stream = LocationDataClientManager(fwd_lower_stream_address, fwd_lower_stream_port)
+        self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
+
+        self.main_controller.a().whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 7, drive_proportional= 1, y_offset= 1))
 
         self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
@@ -84,14 +104,17 @@ class Robot(wpilib.TimedRobot):
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
+        pass
     
     def autonomousInit(self):
         self.auto_command.schedule()
+        self.drive.yaw_reference = self.drive.getAngle()
     
     def autonomousPeriodic(self):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
+        self.drive.yaw_reference = self.drive.getAngle()
         self.grabber.grabber_angle = self.grabber.grabber_angle
         if self.auto_command is not None and self.auto_command.isScheduled():
             self.auto_command.cancel()

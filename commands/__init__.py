@@ -8,7 +8,12 @@ from .basic_commands.toggle_slide_command import ToggleSlideCommand
 from .basic_commands.toggle_bird_command import ToggleBirdCommand
 from .grabber_angle_preset_command import GrabberAnglePresetCommand
 from .reset_drive_command import ResetDriveCommand
+
+from .apriltag_commands.apriltag_angle_distance_command import ApriltagAngleDistanceCommand
+from .apriltag_commands.angle_track_command import AngleTrackCommand
 from .bird_catch_command import BirdCatchCommand
+
+from .apriltag_commands.goto_tag_command import GotoTagCommand
 
 from .auto.auto_drive_command import AutoDriveCommand
 from .auto.auto_grab_command import AutoGrabCommand
