@@ -7,12 +7,14 @@ from wpimath.geometry import Translation2d
 
 
 class GotoTagCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_id: int, drive_proportional: float, loss_timeout: float = 0.2, ignore_x: bool = False, ignore_y: bool = False, x_offset: float = 0, y_offset: float = 0, deadband: float = 0.05):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_ids: list|int, drive_proportional: float, loss_timeout: float = 0.2, ignore_x: bool = False, ignore_y: bool = False, x_offset: float = 0, y_offset: float = 0, deadband: float = 0.05):
         super().__init__()
 
         self.subsystem = subsystem
         self.stream = location_stream
-        self.target_id = target_id
+        if target_ids is int:
+            target_ids = [target_ids]
+        self.target_id = target_ids
 
         self.drive_proportional = drive_proportional
         self.deadband = deadband
