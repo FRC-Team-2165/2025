@@ -34,6 +34,8 @@ from commands import AngleTrackCommand,\
 
 from components import LocationDataClientManager
 
+import socket
+
 fwd_upper_stream_address = "vision-2165-working.local"
 fwd_upper_stream_port = 1181
 
@@ -129,24 +131,54 @@ class Robot(wpilib.TimedRobot):
         )
 
         self.auto_command = self.auto_tagged
+        self.auto_command = self.auto_leave_algae_coral
+        self.eyes_n_ears_controller = None
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
         pass
     
     def autonomousInit(self):
+        if self.eyes_n_ears_controller is None:
+            # This is an error streamroller. This is intentional. Do not try to make this less bad
+            try:
+                controller = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                controller.connect(("vision-2165-working.local", 5810))
+                self.eyes_n_ears_controller = controller
+            except:
+                pass
+
         self.auto_command.schedule()
     
     def autonomousPeriodic(self):
         return super().autonomousPeriodic()
 
     def teleopInit(self):
+        if self.eyes_n_ears_controller is None:
+            # This is an error streamroller. This is intentional. Do not try to make this less bad
+            try:
+                controller = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                controller.connect(("vision-2165-working.local", 5810))
+                self.eyes_n_ears_controller = controller
+            except:
+                pass
+        
         self.grabber.grabber_angle = self.grabber.grabber_angle
         if self.auto_command is not None and self.auto_command.isScheduled():
             self.auto_command.cancel()
     
     def teleopPeriodic(self):
         return super().teleopPeriodic()
+
+    def disabledInit(self):
+        if self.eyes_n_ears_controller is not None:
+            try:
+                control_code = 0xc20015a4.to_bytes(4, byte_order="big", signed=False)
+                self.eyes_n_ears_controller.sendall(control_code)
+            except:
+                pass
+            finally:
+                self.eyes_n_ears_controller = None
     
 if __name__ == "__main__":
     wpilib.run(Robot)
