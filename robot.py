@@ -25,9 +25,11 @@ from commands import AutoGrabberAngleCommand,\
     AutoReleaseCommand,\
     AutoLoadCommand,\
     AutoDumpCommand,\
-    ResetDriveCommand,\
-    AngleTrackCommand,\
-    GotoTagCommand
+    ResetDriveCommand
+
+from commands import AngleTrackCommand,\
+    GotoTagCommand,\
+    DriveCommand
 
 from components import LocationDataClientManager
 
@@ -39,6 +41,8 @@ fwd_lower_stream_port = 1183
 
 grabber_stream_address = "vision-2165-working.local"
 grabber_stream_port = 1185
+
+coral_tags = [6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -69,9 +73,9 @@ class Robot(wpilib.TimedRobot):
         self.fwd_lower_stream = LocationDataClientManager(fwd_lower_stream_address, fwd_lower_stream_port)
         self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
 
-        self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/2, y_offset= 0, ignore_x= True))
-        self.main_controller.a().and_(self.main_controller.povLeft()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/3, y_offset= 0.5, x_offset= 0.25))
-        self.main_controller.a().and_(self.main_controller.povRight()).whileTrue(GotoTagCommand(self.drive, self.fwd_upper_stream, 2, drive_proportional= 1/3, y_offset= 0.5, x_offset= -0.25))
+        self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(DriveCommand(self.drive, y_speed= 0.25))
+        self.main_controller.a().and_(self.main_controller.povLeft()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= 0.17, y_offset= 1.25))
+        self.main_controller.a().and_(self.main_controller.povRight()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= -0.15, y_offset= 1.25))
 
         self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
