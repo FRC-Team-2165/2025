@@ -150,9 +150,13 @@ class Robot(wpilib.TimedRobot):
 
     def disabledInit(self):
         if self.eyes_n_ears_controller is not None:
-            control_code = 0xc20015a4.to_bytes(4, byte_order="big", signed=False)
-            self.eyes_n_ears_controller.sendall(control_code)
-            self.eyes_n_ears_controller = None
+            try:
+                control_code = 0xc20015a4.to_bytes(4, byte_order="big", signed=False)
+                self.eyes_n_ears_controller.sendall(control_code)
+            except:
+                pass
+            finally:
+                self.eyes_n_ears_controller = None
     
 if __name__ == "__main__":
     wpilib.run(Robot)
