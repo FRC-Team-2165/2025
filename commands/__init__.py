@@ -12,6 +12,7 @@ from .reset_drive_command import ResetDriveCommand
 from .apriltag_commands.angle_track_command import AngleTrackCommand
 from .apriltag_commands.goto_tag_command import GotoTagCommand
 from .apriltag_commands.drive_command import DriveCommand
+from .apriltag_commands.auto_goto_tag_command import AutoGotoTagCommand
 
 from .bird_catch_command import BirdCatchCommand
 

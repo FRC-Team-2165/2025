@@ -29,6 +29,7 @@ from commands import AutoGrabberAngleCommand,\
 
 from commands import AngleTrackCommand,\
     GotoTagCommand,\
+    AutoGotoTagCommand,\
     DriveCommand
 
 from components import LocationDataClientManager
@@ -74,8 +75,8 @@ class Robot(wpilib.TimedRobot):
         self.grabber_stream = LocationDataClientManager(grabber_stream_address, grabber_stream_port)
 
         self.main_controller.a().and_(self.main_controller.povUp()).whileTrue(DriveCommand(self.drive, y_speed= 0.25))
-        self.main_controller.a().and_(self.main_controller.povLeft()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= 0.17, y_offset= 1.25))
-        self.main_controller.a().and_(self.main_controller.povRight()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= -0.15, y_offset= 1.25))
+        self.main_controller.a().and_(self.main_controller.povLeft()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= 0.17, y_offset= 1.25, angle_offset= 5))
+        self.main_controller.a().and_(self.main_controller.povRight()).whileTrue(GotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= -0.15, y_offset= 1.25, angle_offset= -1))
 
         self.auto_leave_algae_coral = commands2.SequentialCommandGroup(
             AutoDriveCommand(self.drive, angle=90, reset_angle= True),
@@ -106,7 +107,28 @@ class Robot(wpilib.TimedRobot):
             AutoDriveCommand(self.drive, reset_angle= True)
         )
 
-        self.auto_command = self.auto_leave_algae_coral
+        self.auto_tagged = commands2.SequentialCommandGroup(
+            AutoDriveCommand(self.drive, angle=90, reset_angle= True),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.REEF_GRAB),
+            commands2.WaitCommand(0.25),
+            AutoReleaseCommand(self.grabber),
+            AutoDriveCommand(self.drive, y_dist= 1.7, move_speed= 0.3),
+            commands2.WaitCommand(0.25),
+            AutoGrabCommand(self.grabber),
+            commands2.WaitCommand(0.5),
+            AutoGrabberAngleCommand(self.grabber, self.grabber.presets.STORE),
+            commands2.WaitCommand(0.5),
+            AutoDriveCommand(self.drive, y_dist= -1.25, move_speed= 0.3),
+            AutoDriveCommand(self.drive, angle= -90),
+            AutoGotoTagCommand(self.drive, self.fwd_lower_stream, coral_tags, drive_proportional= 1/3, rotation_proportional= 1/270, x_offset= -0.15, y_offset= 1.25, angle_offset= -1),
+            AutoDriveCommand(self.drive, y_dist= 1.25, move_speed= 0.3),
+            AutoDumpCommand(self.slide),
+            commands2.WaitCommand(1),
+            AutoDriveCommand(self.drive, y_dist= -0.5, angle= 180, turn_speed= 0.4, angle_deadband= 10),
+            AutoDriveCommand(self.drive, reset_angle= True)
+        )
+
+        self.auto_command = self.auto_tagged
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()

@@ -3,10 +3,11 @@ from subsystems import DriveSubsystem
 from components import LocationDataClientManager, Location
 from wpimath.geometry import Translation2d
 from math import degrees, atan
+from wpilib import Timer
 
 
-class GotoTagCommand(Command):
-    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_ids: int|list[int], drive_proportional: float = 1, rotation_proportional: float = 1, x_offset: float = 0, y_offset: float = 0, angle_offset: float = 0, distance_deadband: float = 0.05, rotation_deadband: float = 1):
+class AutoGotoTagCommand(Command):
+    def __init__(self, subsystem: DriveSubsystem, location_stream: LocationDataClientManager, target_ids: int|list[int], drive_proportional: float = 1, rotation_proportional: float = 1, x_offset: float = 0, y_offset: float = 0, angle_offset: float = 0, distance_deadband: float = 0.05, rotation_deadband: float = 1, loss_timeout: float = 0.5, correct_timeout: float = 0.5):
         super().__init__()
 
         self.subsystem = subsystem
@@ -31,6 +32,11 @@ class GotoTagCommand(Command):
         self.y_speed = 0
         self.rot_speed = 0
 
+        self.loss_timeout = loss_timeout
+        self.correct_timeout = correct_timeout
+        self.loss_timer = Timer()
+        self.correct_timer = Timer()
+
         self.addRequirements(subsystem)
     
 
@@ -38,6 +44,10 @@ class GotoTagCommand(Command):
         self.subsystem.resetPosition()
         self.has_target = False
         self.stream.startRequest()
+        self.loss_timer.reset()
+        self.correct_timer.reset()
+
+        self.loss_timer.start()
     
 
     def execute(self):
@@ -50,14 +60,15 @@ class GotoTagCommand(Command):
             i: Location
             if i.id_num in self.target_ids:
                 self.has_target = True
-                
+
                 valid_targets.append(i)
         
         if self.has_target:
+            self.loss_timer.restart()
             positions = []
             for i in valid_targets:
                 positions.append(Translation2d(i.x, i.y))
-            self.target_pos =  Translation2d().nearest(positions)
+            self.target_pos = Translation2d().nearest(positions)
             target = valid_targets[positions.index(self.target_pos)]
             self.target_angle = (degrees(atan((target.x) / (target.y))) + self.subsystem.getAngle()) % 360
             print("got target")
@@ -89,17 +100,20 @@ class GotoTagCommand(Command):
                 speed = rot_error * self.rotation_proportional
                 rot_speed = speed + 0.1 * (rot_error / abs(rot_error))
             self.rot_speed = rot_speed
-            print(rot_error, rot_speed)
+
+            if self.x_speed != 0 or self.y_speed != 0 or self.rot_speed != 0:
+                self.correct_timer.restart()
         else:
             self.x_speed = 0
             self.y_speed = 0
             self.rot_speed = 0
         self.subsystem.drive(self.x_speed, self.y_speed, self.rot_speed, False)
-    
+
 
     def end(self, interrupted):
         self.stream.stopRequest()
     
 
     def isFinished(self):
-        return super().isFinished()
+        if self.loss_timer.hasElapsed(self.loss_timeout) or self.correct_timer.hasElapsed(self.correct_timeout):
+            return True
